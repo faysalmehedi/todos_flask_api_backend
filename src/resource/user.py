@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request
 from src.utils import ResponseGenerator
 from src.decorators import token_required
 from src.models.user import User
@@ -20,16 +20,15 @@ def create_user():
     new_user = User(name=data['name'], email=data['email'], password=data['password'], admin=admin)
     User.save(new_user)
 
-    return jsonify({
-        'message': data
-    })
+    return ResponseGenerator.generate_response(data, 200)
 
 
 @user_blueprint.route('/api/v1/users', methods=['GET'])
 @token_required
 def get_all_users(current_user):
     if not current_user.admin:
-        return jsonify({'message' : 'Cannot perform that function!'})
+        return ResponseGenerator.not_authorized()
+    
     users = User.query.all()
     output = []
 
@@ -41,22 +40,19 @@ def get_all_users(current_user):
         user_data['admin'] = user.admin
         output.append(user_data)
 
-    return jsonify({
-        'users': output
-    })
+    return ResponseGenerator.generate_response(output, 200)
 
 
 @user_blueprint.route('/api/v1/user/<email>', methods=['GET'])
 @token_required
 def get_one_user(current_user, email):
         if not current_user.admin:
-            return jsonify({'message' : 'Cannot perform that function!'})
+            return ResponseGenerator.not_authorized()
+
         user = User.query.filter_by(email=email).first()
 
         if not user:
-            return jsonify({
-                'message': 'No user found in the Database!'
-            })
+            return ResponseGenerator.not_found()
 
         user_data = {}
         user_data['id'] = user.id
@@ -64,24 +60,20 @@ def get_one_user(current_user, email):
         user_data['email'] = user.email 
         user_data['admin'] = user.admin
 
-        return jsonify({
-            'user': user_data
-        })
+        return ResponseGenerator.generate_response(user_data, 200)
 
 @user_blueprint.route('/api/v1/update/<email>', methods=['PUT'])
 @token_required
 def update_user(current_user, email):
     
     if not current_user.admin:
-        return jsonify({'message' : 'Cannot perform that function!'})
+        return ResponseGenerator.not_authorized()
 
     user = User.query.filter_by(email=email).first()
     data = request.get_json()
 
     if not user:
-        return jsonify({
-            'message': 'No user found in the Database!'
-        })
+        return ResponseGenerator.not_found()
 
     if data['admin'] == "True":
         admin = True
@@ -96,36 +88,22 @@ def update_user(current_user, email):
 
     User.update(update_user)
 
-    return jsonify({
-        'message': 'User information Updateed!'
-    })
+    return ResponseGenerator.generate_response(update_user, 200)
 
 @user_blueprint.route('/api/v1/delete/<email>', methods=['DELETE'])
 @token_required
 def delete_user(current_user, email):
 
     if not current_user.admin:
-        return jsonify({'message' : 'Cannot perform that function!'})
+        return ResponseGenerator.not_authorized()
 
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        return jsonify({
-            'message': 'No user found in the Database!'
-        })
+        return ResponseGenerator.not_found()
 
     User.delete(user)
 
-
-    return jsonify({
-        'message': "User deleted Successfully!"
-    })
+    return ResponseGenerator.generate_response(f"{user.name} deleted successfully from DB.", 200)
 
 
-# @user_blueprint.route("/api/v1/register")
-# def register():
-#     return ResponseGenerator.generate_response("Hello", 200)
-
-# @user_blueprint.route("/api/v1/login")
-# def login():
-#     return ResponseGenerator.generate_response("Hello", 200)
