@@ -16,15 +16,13 @@ $ sudo docker-compose ps
 ## For application Running
 
 ```
-$ python3 -m venv env
-$ source env/bin/activate
 $ pip install -r requirments.txt
 $ python manage.py db init
 $ python manage.py db migrate
 $ python manage.py db upgrade
 $ python server.py
 ```
-### Go to http://127.0.0.1:5050/
+### Go to http://0.0.0.0:5050/
 
 ## Endpoints:
 
