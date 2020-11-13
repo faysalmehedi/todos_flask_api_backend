@@ -29,3 +29,24 @@ class User(db.Model, BaseModel):
 
     def check_password(self, password: str):
         return bcrypt.checkpw(password=password.encode(), hashed_password=self._password.encode())
+
+
+class Todo(db.Model, BaseModel):
+
+    __tablename__ = "todos"
+
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(50))
+    complete = db.Column(db.Boolean)
+    user_id = db.Column(db.Integer)
+
+    def __init__(self, text, complete, user_id, **kwargs):
+        
+        super(Todo, self).__init__(**kwargs)
+        
+        self.text = text 
+        self.complete = complete 
+        self.user_id = user_id
+
+    def __repr__(self):
+        return f"Todo::{self.id}"

@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
-from src.models.user import User
+from src.models.models import User
 from src.core.config import Configuration
+from src.utils import ResponseGenerator
 import jwt
 import datetime
 
@@ -11,7 +12,8 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+        # return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required"'})
+        return ResponseGenerator.mandatory_field(["email", "password"], 401)
     
     user = User.query.filter_by(email=auth.username).first()
     

@@ -34,7 +34,7 @@ class ResponseGenerator:
         if fields is None:
             fields = []
 
-        return ResponseGenerator.error_response(",".join(fields) + " are mandatory fields!", code)
+        return ResponseGenerator.error_response(", ".join(fields) + " are mandatory fields!", code)
 
     @staticmethod
     def not_authorized(msg: str = "Unauthorized request!", code: int = HTTPStatus.UNAUTHORIZED):

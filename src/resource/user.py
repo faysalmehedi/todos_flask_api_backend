@@ -1,7 +1,7 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from src.utils import ResponseGenerator
 from src.decorators import token_required
-from src.models.user import User
+from src.models.models import User
 
 
 user_blueprint = Blueprint('user', __name__)
@@ -11,6 +11,11 @@ user_blueprint = Blueprint('user', __name__)
 def create_user():
 
     data = request.get_json()
+    email = data['email']
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        return ResponseGenerator.error_response(f"Already {email} exist in DB. Try using other email address", 409)
     
     if data['admin'] == "True":
         admin = True
@@ -88,7 +93,8 @@ def update_user(current_user, email):
 
     User.update(update_user)
 
-    return ResponseGenerator.generate_response(update_user, 200)
+    return ResponseGenerator.generate_response(f"{update_user.name} has been successfully updated", 200)
+
 
 @user_blueprint.route('/api/v1/delete/<email>', methods=['DELETE'])
 @token_required
